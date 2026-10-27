@@ -1,0 +1,6 @@
+participant_id,status,current_method,pain_from_last_event,task_result,help_evidence_type,help_needed,preferred_option,reason_for_choice,missing_requirement,price_scenario_usd,paid_pilot_requested,actual_payment_received_usd,notes
+P01,Not recruited,,,,,,,,,12,,,
+P02,Not recruited,,,,,,,,,12,,,
+P03,Not recruited,,,,,,,,,12,,,
+P04,Not recruited,,,,,,,,,12,,,
+P05,Not recruited,,,,,,,,,12,,,
