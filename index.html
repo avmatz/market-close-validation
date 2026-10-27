@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Market Close | A vendor workflow test</title>
+  <style>
+    :root { color-scheme: light; --ink: #183137; --muted: #4b6065; --line: #cbd9d8; --paper: #fff; --accent: #096b59; }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { background: #edf3f1; }
+    body { max-width: 1120px; margin: auto; padding: 28px 20px 60px; color: var(--ink); font: 16px/1.6 system-ui, sans-serif; }
+    a { color: #075d8b; text-underline-offset: 3px; }
+    a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible, summary:focus-visible { outline: 3px solid #1669b2; outline-offset: 3px; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { font-size: clamp(2rem, 6vw, 3.5rem); line-height: 1.1; margin-bottom: 18px; letter-spacing: -.04em; }
+    h2 { font-size: 1.45rem; line-height: 1.3; }
+    h3 { font-size: 1.05rem; }
+    nav, .actions, .status-line { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; }
+    nav { margin-bottom: 32px; justify-content: space-between; }
+    nav a { font-size: .9rem; }
+    .brand { font-weight: 800; letter-spacing: -.03em; font-size: 1.2rem; }
+    .eyebrow { color: var(--accent); font-weight: 750; font-size: .75rem; letter-spacing: .1em; text-transform: uppercase; }
+    .intro { max-width: 750px; font-size: 1.1rem; }
+    .muted, .note { color: var(--muted); }
+    .note { font-size: .88rem; }
+    .panel { margin-top: 24px; padding: 24px; border: 1px solid var(--line); border-radius: 16px; background: var(--paper); }
+    .callout { padding: 14px 18px; background: #edf7f3; border-left: 4px solid var(--accent); border-radius: 4px; }
+    .warning { background: #fff5df; border-color: #9c5e08; }
+    .error { background: #fff1ef; border-color: #aa3222; }
+    .pill { border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; font-size: .8rem; font-weight: 650; }
+    button { border: 1px solid #6b8583; border-radius: 8px; padding: 10px 16px; background: #fff; color: var(--ink); font: inherit; font-weight: 650; cursor: pointer; min-height: 44px; }
+    button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+    button:hover { filter: brightness(.95); }
+    input, select, textarea { width: 100%; min-height: 44px; padding: 9px; font: inherit; color: var(--ink); background: #fff; border: 1px solid #839b98; border-radius: 6px; }
+    input[aria-invalid="true"] { border: 2px solid #aa3222; background: #fff5f3; }
+    textarea { min-height: 100px; resize: vertical; }
+    label { display: block; font-size: .88rem; font-weight: 650; }
+    label span { display: block; font-weight: 400; color: var(--muted); }
+    fieldset { border: 0; padding: 0; margin: 24px 0; min-width: 0; }
+    legend { margin-bottom: 12px; font-weight: 750; }
+    .fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr)); gap: 16px; }
+    .table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; }
+    table { border-collapse: collapse; width: 100%; text-align: left; }
+    .stock-table { min-width: 790px; }
+    th, td { padding: 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th { font-size: .78rem; background: #f0f5f3; }
+    th:first-child { width: 23%; }
+    .stock-table input { min-width: 80px; padding: 8px; }
+    .stock-table td:first-child input { min-width: 150px; }
+    tr:last-child td { border-bottom: 0; }
+    output { font-variant-numeric: tabular-nums; }
+    .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 205px), 1fr)); gap: 12px; margin: 18px 0; }
+    .metric { padding: 16px; background: #f2f6f5; border-radius: 10px; }
+    .metric span, .metric strong { display: block; }
+    .metric span { color: var(--muted); font-size: .8rem; }
+    .metric strong { font-size: 1.7rem; letter-spacing: -.03em; }
+    .comparison { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 16px; }
+    .option { border: 1px solid var(--line); border-radius: 10px; padding: 16px; }
+    .option h3 { min-height: 2.8em; margin-bottom: 8px; }
+    .option p { font-size: .9rem; }
+    .question { margin: 22px 0; }
+    .question label { font-size: 1rem; margin-bottom: 8px; }
+    details summary { cursor: pointer; font-weight: 750; }
+    details[open] summary { margin-bottom: 20px; }
+    .recruitment { min-height: 210px; font-size: .9rem; }
+    .feedback-output { min-height: 290px; }
+    .print-only { display: none; }
+    footer { margin-top: 24px; font-size: .85rem; color: var(--muted); }
+    @media print {
+      html, body { background: #fff; color: #000; max-width: none; padding: 0; font-size: 10pt; }
+      nav, .no-print, #comparison, #feedback, #research-guide { display: none !important; }
+      .print-only { display: block; }
+      .panel { border: 1px solid #888; padding: 12px; border-radius: 0; }
+      .table-scroll { overflow: visible; border: 0; }
+      .stock-table { min-width: 0; table-layout: fixed; }
+      .stock-table th:first-child { width: 24%; }
+      .stock-table input, .stock-table td:first-child input { min-width: 0; padding: 2px; min-height: 0; border: 0; font-size: 9pt; }
+      th, td { padding: 5px; }
+      .fields { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+      .fields input { min-height: 0; padding: 2px; border: 0; }
+      .metrics { grid-template-columns: repeat(4, 1fr); gap: 6px; }
+      .metric { padding: 6px; }
+      .metric strong { font-size: 14pt; }
+      .callout { padding: 8px; }
+      .metrics, tr { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <nav aria-label="Page sections">
+    <span class="brand">Market Close / research concept</span>
+    <div class="actions"><a href="#demo">Try the example</a><a href="#comparison">Compare options</a><a href="#feedback">Give feedback</a><a href="#research-guide">Run the test</a></div>
+  </nav>
+
+  <header>
+    <p class="eyebrow">Early workflow test / fictional data / no checkout</p>
+    <h1>Close out a market day.<br>Not every unique item.</h1>
+    <p class="intro">An example for solo makers who group one-of-a-kind products by price tier. Count what went out and came home, account for non-sale items, then compare the stock record with the money recorded.</p>
+    <p class="callout">This is a research example, not a finished product or proof of demand. The page does not upload or save your entries. The proposed format is a spreadsheet and printable tally sheet; this browser page only demonstrates the workflow.</p>
+    <div class="status-line"><span class="pill">Actual vendor responses: 0 / 5</span><span class="pill">Actual purchases: 0</span><span class="note">Personal preference is not a purchase.</span></div>
+  </header>
+
+  <section class="panel" id="demo" aria-labelledby="demo-heading">
+    <p class="eyebrow">1 / Try it before judging it</p>
+    <h2 id="demo-heading">A small example, using made-up numbers</h2>
+    <p>Each row is one price tier, not one unique item. Use separate rows for different prices. All money in this example is <strong>USD, excluding sales tax / VAT</strong>.</p>
+    <div class="actions no-print">
+      <button type="button" id="sample-a">Load Sample A</button>
+      <button type="button" id="sample-b">Load Sample B</button>
+      <button type="button" id="print">Print this example</button>
+      <span class="note" id="sample-status" role="status">Sample A is loaded.</span>
+    </div>
+    <p class="callout no-print"><strong>Participant task:</strong> Load Sample B. Does the record balance, and what would you check next? Then change the booth fee to $70. What happens to the surplus? Do not fix other figures just to make the record balance.</p>
+
+    <form id="closeout-form" novalidate>
+      <fieldset>
+        <legend>Stock counts and price tiers</legend>
+        <p class="note">Unit cost means materials and packaging, not your labor. Non-sale units include gifts or damaged stock. Their material costs still count.</p>
+        <div class="table-scroll" tabindex="0" role="region" aria-label="Stock counts; scroll horizontally on a small screen">
+          <table class="stock-table">
+            <thead><tr><th scope="col">Group / price tier</th><th scope="col">Price ($)</th><th scope="col">Unit cost ($)</th><th scope="col">Taken</th><th scope="col">Brought home</th><th scope="col">Non-sale units</th><th scope="col">Units sold</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><input name="rows.0.name" aria-label="Group 1 name" value="Small pieces" maxlength="60" required></td>
+                <td><input name="rows.0.price" aria-label="Group 1 selling price" type="number" min="0" step="0.01" value="10.00" required></td>
+                <td><input name="rows.0.unitCost" aria-label="Group 1 material and packaging cost" type="number" min="0" step="0.01" value="3.00" required></td>
+                <td><input name="rows.0.taken" aria-label="Group 1 units taken" type="number" min="0" step="1" value="30" required></td>
+                <td><input name="rows.0.returned" aria-label="Group 1 units brought home" type="number" min="0" step="1" value="12" required></td>
+                <td><input name="rows.0.nonSale" aria-label="Group 1 non-sale units" type="number" min="0" step="1" value="2" required></td>
+                <td><output id="sold-0">--</output></td>
+              </tr>
+              <tr>
+                <td><input name="rows.1.name" aria-label="Group 2 name" value="Medium pieces" maxlength="60" required></td>
+                <td><input name="rows.1.price" aria-label="Group 2 selling price" type="number" min="0" step="0.01" value="20.00" required></td>
+                <td><input name="rows.1.unitCost" aria-label="Group 2 material and packaging cost" type="number" min="0" step="0.01" value="6.00" required></td>
+                <td><input name="rows.1.taken" aria-label="Group 2 units taken" type="number" min="0" step="1" value="20" required></td>
+                <td><input name="rows.1.returned" aria-label="Group 2 units brought home" type="number" min="0" step="1" value="7" required></td>
+                <td><input name="rows.1.nonSale" aria-label="Group 2 non-sale units" type="number" min="0" step="1" value="1" required></td>
+                <td><output id="sold-1">--</output></td>
+              </tr>
+              <tr>
+                <td><input name="rows.2.name" aria-label="Group 3 name" value="Large pieces" maxlength="60" required></td>
+                <td><input name="rows.2.price" aria-label="Group 3 selling price" type="number" min="0" step="0.01" value="35.00" required></td>
+                <td><input name="rows.2.unitCost" aria-label="Group 3 material and packaging cost" type="number" min="0" step="0.01" value="12.00" required></td>
+                <td><input name="rows.2.taken" aria-label="Group 3 units taken" type="number" min="0" step="1" value="10" required></td>
+                <td><input name="rows.2.returned" aria-label="Group 3 units brought home" type="number" min="0" step="1" value="6" required></td>
+                <td><input name="rows.2.nonSale" aria-label="Group 3 non-sale units" type="number" min="0" step="1" value="0" required></td>
+                <td><output id="sold-2">--</output></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Money and effort</legend>
+        <div class="fields">
+          <label>Opening cash float ($)<input name="openingCash" type="number" min="0" step="0.01" value="50.00" required></label>
+          <label>Closing cash counted ($)<input name="closingCash" type="number" min="0" step="0.01" value="275.00" required></label>
+          <label>Gross card takings ($)<input name="cardGross" type="number" min="0" step="0.01" value="305.00" required></label>
+          <label>Other gross takings ($)<input name="otherGross" type="number" min="0" step="0.01" value="0.00" required></label>
+          <label>Total discounts given ($)<input name="discounts" type="number" min="0" step="0.01" value="10.00" required></label>
+          <label>Actual payment fees ($)<input name="paymentFees" type="number" min="0" step="0.01" value="11.00" required></label>
+          <label>Booth fee ($)<input name="booth" type="number" min="0" step="0.01" value="60.00" required></label>
+          <label>Travel costs ($)<input name="travel" type="number" min="0" step="0.01" value="20.00" required></label>
+          <label>Other event costs ($)<input name="otherCosts" type="number" min="0" step="0.01" value="10.00" required></label>
+          <label>Total hours<input name="hours" type="number" min="0.01" step="0.01" value="9" required><span>Include production, prep, travel, setup, selling and pack-down.</span></label>
+        </div>
+        <p class="note">Use gross card sales, not the net bank deposit; fees are deducted separately. This rough example does not handle refunds, cash withdrawals, drawer-paid expenses, tax calculations or different material costs within a tier. A stock discrepancy is a reason to check records, not proof of a missed sale or theft.</p>
+      </fieldset>
+
+      <div id="validation-errors" class="callout error" role="alert" hidden><strong>Check these entries before using the result:</strong><ul id="error-list"></ul></div>
+      <div id="results" aria-live="polite" aria-atomic="true">
+        <p id="balance-status" class="callout">Calculating the fictional example...</p>
+        <div class="metrics">
+          <div class="metric"><span>Stock-implied takings, after discounts</span><strong><output id="expected">--</output></strong></div>
+          <div class="metric"><span>Recorded gross takings</span><strong><output id="recorded">--</output></strong></div>
+          <div class="metric"><span>Recorded minus stock-implied</span><strong><output id="variance">--</output></strong></div>
+          <div class="metric"><span>Surplus after direct costs</span><strong><output id="surplus">--</output></strong></div>
+        </div>
+        <p><strong><output id="units">--</output> units sold</strong>; <output id="materials">--</output> materials and packaging used, including non-sale units; <strong><output id="hourly">--</output> per hour</strong> after direct costs.</p>
+        <p class="note">Surplus uses recorded receipts less consumed materials, payment fees and entered event costs. It is not accounting profit or take-home pay: income tax, unentered overhead and a separate wage expense are not deducted. The hourly figure divides that surplus by your entered total time.</p>
+      </div>
+    </form>
+    <noscript><p class="callout error">JavaScript is required for the interactive example. The comparison and interview guide below still work.</p></noscript>
+  </section>
+
+  <section class="panel" id="comparison" aria-labelledby="comparison-heading">
+    <p class="eyebrow">2 / Alternatives are part of the test</p>
+    <h2 id="comparison-heading">What would you actually use at your next event?</h2>
+    <p>Keeping your current method, using something free, or choosing an established product are all valid answers. Compare the workflow and what is missing, not just the appearance.</p>
+    <div class="comparison">
+      <article class="option"><h3>Your current method / a free worksheet</h3><p><strong>No new paid tool required</strong></p><p>Keep your notebook or existing sheet. Made Urban also provides free printable sales and event-cost worksheets.</p><a href="https://www.madeurban.com/blog/7-stats-to-track-at-craft-shows-to-improve-sales/" target="_blank" rel="noopener noreferrer">See the free worksheets</a></article>
+      <article class="option"><h3>WillowberryDesign</h3><p><strong>US$3 observed price</strong></p><p>Excel workbook with expenses, craft-fair log, inventory, checklist and an Etsy profit calculator.</p><p class="note">9 item reviews, 5/5 when checked.</p><a href="https://www.etsy.com/listing/1524486773/etsy-craft-fair-bookkeeping-spreadsheet" target="_blank" rel="noopener noreferrer">View the existing product</a></article>
+      <article class="option"><h3>Create and Calculate</h3><p><strong>US$14 observed price</strong></p><p>Google Sheets inventory, sales, events, checklist and contacts, with a video guide.</p><p class="note">31 item reviews, 4.9/5 when checked.</p><a href="https://www.etsy.com/listing/1482898946/craft-fair-tracker-craft-vendor" target="_blank" rel="noopener noreferrer">View the existing product</a></article>
+      <article class="option"><h3>DearmoraCo</h3><p><strong>US$6.74 observed sale price</strong></p><p>Excel dashboard advertising card fees, inventory movements, break-even planning, event comparisons and profit per hour.</p><p class="note">No item reviews when checked. No item-level sales volume verified.</p><a href="https://www.etsy.com/listing/4598047044/craft-fair-vendor-inventory-profit" target="_blank" rel="noopener noreferrer">View the existing product</a></article>
+      <article class="option"><h3>This closeout concept</h3><p><strong>US$12 price scenario only</strong></p><p>A proposed fixed-format spreadsheet and printable tally sheet for categories and price tiers, with a closeout check.</p><p class="note">No customer reviews. No checkout. Not available for purchase. The browser example is not the final spreadsheet.</p></article>
+    </div>
+    <p class="note">Competitor facts were checked on October 27, 2026. Prices can change. Feature descriptions are sellers' claims; their files have not been purchased or tested. We have not established that this concept solves a problem those alternatives cannot solve.</p>
+  </section>
+
+  <section class="panel" id="feedback" aria-labelledby="feedback-heading">
+    <p class="eyebrow">3 / Honest feedback, not encouragement</p>
+    <h2 id="feedback-heading">Five short questions</h2>
+    <p>Use fictional numbers; do not include private customer or financial information. This form only creates text on your device. <strong>It does not send or save a response.</strong> Send the generated text to the person who invited you only if you choose.</p>
+    <form id="feedback-form">
+      <div class="question"><label for="current-method">1. At your last event, how did you track sales and close out the day? What step, if any, was troublesome?</label><textarea id="current-method" name="currentMethod" required></textarea></div>
+      <div class="question"><label for="task-result">2. After trying Sample B, what would you check next? What changed when you set the booth fee to $70?</label><textarea id="task-result" name="taskResult" required></textarea></div>
+      <div class="question"><label for="choice">3. Which would you choose for your next event, considering the prices shown?</label><select id="choice" name="choice" required><option value="">Choose one</option><option>Keep my current method</option><option>Use a free worksheet</option><option>WillowberryDesign at US$3</option><option>Create and Calculate at US$14</option><option>DearmoraCo at US$6.74</option><option>The proposed closeout kit at US$12</option><option>None of these / not enough information</option></select></div>
+      <div class="question"><label for="reason">4. Why that option? What specific missing detail would stop you using this concept?</label><textarea id="reason" name="reason" required></textarea></div>
+      <div class="question"><label for="help">5. Could you try the example without assistance?</label><select id="help" name="help" required><option value="">Choose one</option><option>Yes, without help</option><option>No, I needed help</option><option>I could not complete it</option></select><label for="help-detail">If you got stuck, where? <span>Optional</span></label><textarea id="help-detail" name="helpDetail"></textarea></div>
+      <button class="primary" type="submit">Generate my response - nothing is sent</button>
+    </form>
+    <div id="feedback-result" hidden>
+      <p class="callout" role="status">Your text is ready below. Nothing has been submitted. Select and copy it if you want to share it.</p>
+      <label for="feedback-text">Copyable response</label>
+      <textarea class="feedback-output" id="feedback-text" readonly></textarea>
+      <p>You can reply to the person who invited you, or <a href="https://github.com/avmatz/market-close-validation/issues/new" target="_blank" rel="noopener noreferrer">open the GitHub feedback page</a> and paste the text there. GitHub requires an account and submissions are public. Do not include names, customer details or private financial information. Opening the link does not automatically send your response.</p>
+    </div>
+  </section>
+
+  <details class="panel" id="research-guide">
+    <summary>For the researcher: recruitment, answer key and decision rules</summary>
+    <h2>Run a five-vendor comparison, not a product launch</h2>
+    <p>Find five independent vendors who sell one-of-a-kind pieces at in-person markets. Prefer people who have already done a market. This is a convenience sample for learning, not a statistically representative demand study.</p>
+    <p>Ask for a 5-10 minute asynchronous test, or observe one short session if possible. Recruitment can take longer. Do not send bulk messages or post research requests where community rules prohibit them; obtain moderator permission when needed.</p>
+    <h3>Copy-ready invitation</h3>
+    <textarea class="recruitment" readonly aria-label="Copy-ready vendor invitation">I am testing an early idea for closing out a craft-market day when you sell one-of-a-kind pieces. I am looking for five vendors to try a short fictional example and compare it with their current method, a free worksheet and existing paid spreadsheets.
+
+It takes about 5-10 minutes. No purchase, personal details or private business numbers are needed. It is completely fine to prefer your current method or another product; I am trying to find out whether this idea is worth building at all.
+
+If you would like to take part, here is the example: https://avmatz.github.io/market-close-validation/
+
+The page generates a text response on your device but does not send it anywhere. You can send that text back here if you choose. There is also an optional public GitHub feedback link if you already have a GitHub account.</textarea>
+    <p class="callout warning"><strong>Sharing status:</strong> this is a public GitHub Pages demo with public source code, not a private study portal. GitHub may record standard access logs, but this page does not submit form entries. Only fictional example data and an empty response tracker are published. Do not enter sensitive information.</p>
+    <p class="note"><strong>Recruitment restriction:</strong> r/CraftFairs currently prohibits promotional posts and AI content. Do not post this AI-assisted concept there. Use existing vendor contacts or a community that explicitly permits this kind of research; obtain approval where needed. A request on this project's own GitHub issue board is not evidence that vendors have seen or joined the test.</p>
+    <h3>Keep the test neutral</h3>
+    <ol>
+      <li>Ask about the last actual event before explaining your proposed solution. Do not pitch its benefits or tell people which answer you want.</li>
+      <li>Let participants attempt the task before helping. Record observed help separately from self-reported help.</li>
+      <li>Show the alternatives fairly, including their reviews and the option to keep doing what they already do. The feature-rich DearmoraCo option is included so we do not compare only with simpler products.</li>
+      <li>Record why they choose something. A polite compliment or a hypothetical US$12 choice is not a sale.</li>
+    </ol>
+    <h3>Answer key for the fictional exercise</h3>
+    <p><strong>Sample A:</strong> 32 units sold, 3 non-sale units, $530 expected and recorded takings, $180 material cost including non-sale units, $249 surplus and $27.67 per entered hour.</p>
+    <p><strong>Sample B:</strong> recorded takings are $10 below the stock-implied amount; provisional surplus is $239. Raising the booth fee from $60 to $70 reduces it to $229. A good response considers counts, recorded discounts, cash float or payment records rather than silently changing figures to match.</p>
+    <h3>Screen before spending more time</h3>
+    <p>Use a practical screening rule: continue to a tiny paid pilot only if at least three of five can complete and explain the task without help, and at least two choose this concept at the stated price and describe a concrete advantage over the alternatives. If the test is asynchronous, label completion as self-reported, not observed.</p>
+    <p>This threshold is a decision aid, not proof of market demand. A next-stage pilot still needs actual payment and real use of a standard, non-custom product. Scalability then needs a repeatable acquisition channel that fits the available time; two friendly pilot buyers do not establish that.</p>
+    <p>Stop or change direction if vendors prefer free or existing options and cannot identify a meaningful problem we solve better. Do not manufacture a niche to rescue the idea.</p>
+    <p><a href="vendor-responses.csv" download>Download the empty five-participant response tracker</a>. It contains placeholders, not actual responses. Keep completed response records offline; do not upload them to the public repository. Keep participant IDs anonymous and count payments only when received.</p>
+    <p class="note">This concept was motivated in part by <a href="https://www.reddit.com/r/CraftFairs/comments/1rdz6ld/how_to_keep_track_of_sales_at_a_fair_for_a_first/" target="_blank" rel="noopener noreferrer">a public discussion about tracking unique pieces and simplifying categories</a>. That discussion is anecdotal, not a buyer commitment.</p>
+  </details>
+
+  <footer>
+    <p>Research concept prepared October 27, 2026. No analytics, accounts, remote assets, bank connections, sales claims or stored responses. Reloading resets the example and feedback. Print is an example closeout record, not a finished blank tally-sheet product.</p>
+  </footer>
+
+  <script id="closeout-engine">
+    "use strict";
+    globalThis.MarketClose = (() => {
+      const moneyFields = ["openingCash", "closingCash", "cardGross", "otherGross", "discounts", "paymentFees", "booth", "travel", "otherCosts"];
+      const labels = {
+        openingCash: "Opening cash", closingCash: "Closing cash", cardGross: "Gross card takings",
+        otherGross: "Other takings", discounts: "Discounts", paymentFees: "Payment fees",
+        booth: "Booth fee", travel: "Travel costs", otherCosts: "Other costs"
+      };
+
+      function money(text) {
+        if (typeof text !== "string" || !/^(?:\d+(?:\.\d{1,2})?|\.\d{1,2})$/.test(text)) return null;
+        const [whole, fraction = ""] = text.split(".");
+        const cents = Number(whole) * 100 + Number(fraction.padEnd(2, "0"));
+        return Number.isSafeInteger(cents) ? cents : null;
+      }
+
+      function units(text) {
+        if (typeof text !== "string" || !/^\d+$/.test(text)) return null;
+        const count = Number(text);
+        return Number.isSafeInteger(count) ? count : null;
+      }
+
+      function sample(which = "A") {
+        return {
+          rows: [
+            { name: "Small pieces", price: "10.00", unitCost: "3.00", taken: "30", returned: "12", nonSale: "2" },
+            { name: "Medium pieces", price: "20.00", unitCost: "6.00", taken: "20", returned: "7", nonSale: "1" },
+            { name: "Large pieces", price: "35.00", unitCost: "12.00", taken: "10", returned: "6", nonSale: "0" }
+          ],
+          openingCash: "50.00", closingCash: which === "B" ? "265.00" : "275.00",
+          cardGross: "305.00", otherGross: "0.00", discounts: "10.00",
+          paymentFees: "11.00", booth: "60.00", travel: "20.00", otherCosts: "10.00", hours: "9"
+        };
+      }
+
+      function calculate(state) {
+        const errors = [];
+        const fail = (field, message) => errors.push({ field, message });
+        if (!state || !Array.isArray(state.rows) || state.rows.length === 0) {
+          return { ok: false, errors: [{ field: "", message: "At least one stock group is required." }] };
+        }
+        const rows = state.rows.map((row, i) => {
+          const prefix = `rows.${i}.`;
+          const name = typeof row?.name === "string" ? row.name.trim() : "";
+          if (!name) fail(prefix + "name", `Group ${i + 1} needs a name.`);
+          const result = { name };
+          for (const key of ["price", "unitCost"]) {
+            result[key] = money(row?.[key]);
+            if (result[key] === null) fail(prefix + key, `Group ${i + 1}: enter a non-negative ${key === "price" ? "price" : "unit cost"} with up to two decimal places.`);
+          }
+          for (const key of ["taken", "returned", "nonSale"]) {
+            result[key] = units(row?.[key]);
+            if (result[key] === null) fail(prefix + key, `Group ${i + 1}: stock counts must be non-negative whole numbers.`);
+          }
+          if ([result.taken, result.returned, result.nonSale].every(value => value !== null)) {
+            if (result.returned > result.taken) fail(prefix + "returned", `Group ${i + 1}: stock brought home cannot exceed stock taken.`);
+            else if (result.nonSale > result.taken - result.returned) fail(prefix + "nonSale", `Group ${i + 1}: non-sale units exceed stock used.`);
+          }
+          return result;
+        });
+        const amounts = {};
+        for (const field of moneyFields) {
+          amounts[field] = money(state[field]);
+          if (amounts[field] === null) fail(field, `${labels[field]} needs a non-negative amount with up to two decimal places. Use 0 where appropriate.`);
+        }
+        const hours = typeof state.hours === "string" && /^(?:\d+(?:\.\d{1,2})?|\.\d{1,2})$/.test(state.hours) ? Number(state.hours) : NaN;
+        if (!Number.isFinite(hours) || hours <= 0) fail("hours", "Enter total hours greater than zero, with up to two decimal places.");
+        if (amounts.closingCash !== null && amounts.openingCash !== null && amounts.closingCash < amounts.openingCash) {
+          fail("closingCash", "Closing cash is below the opening float. This example does not handle drawer withdrawals or refunds.");
+        }
+        if (errors.length) return { ok: false, errors };
+
+        for (const row of rows) {
+          row.used = row.taken - row.returned;
+          row.sold = row.used - row.nonSale;
+          row.expected = row.sold * row.price;
+          row.materials = row.used * row.unitCost;
+        }
+        const stickerTotal = rows.reduce((total, row) => total + row.expected, 0);
+        const materials = rows.reduce((total, row) => total + row.materials, 0);
+        const sold = rows.reduce((total, row) => total + row.sold, 0);
+        const nonSale = rows.reduce((total, row) => total + row.nonSale, 0);
+        const expected = stickerTotal - amounts.discounts;
+        const recorded = amounts.closingCash - amounts.openingCash + amounts.cardGross + amounts.otherGross;
+        const directCosts = materials + amounts.paymentFees + amounts.booth + amounts.travel + amounts.otherCosts;
+        const variance = recorded - expected;
+        const surplus = recorded - directCosts;
+        const hourly = Math.round(surplus / hours);
+        if (![stickerTotal, materials, sold, nonSale, expected, recorded, directCosts, variance, surplus, hourly].every(Number.isSafeInteger)) {
+          return { ok: false, errors: [{ field: "", message: "These figures exceed the safe calculation range. Use smaller values." }] };
+        }
+        if (expected < 0) return { ok: false, errors: [{ field: "discounts", message: "Discounts cannot exceed the stock-implied sales value." }] };
+        return { ok: true, rows, sold, nonSale, expected, recorded, materials, directCosts, variance, surplus, hourly };
+      }
+
+      return Object.freeze({ money, units, sample, calculate });
+    })();
+  </script>
+  <script>
+    "use strict";
+    const form = document.getElementById("closeout-form");
+    const resultIds = ["expected", "recorded", "variance", "surplus", "units", "materials", "hourly"];
+    const usd = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
+    const format = cents => usd.format(cents / 100);
+    const field = name => form.elements.namedItem(name);
+
+    function readState() {
+      const state = { rows: [] };
+      for (let i = 0; i < 3; i++) {
+        const row = {};
+        for (const key of ["name", "price", "unitCost", "taken", "returned", "nonSale"]) row[key] = field(`rows.${i}.${key}`).value;
+        state.rows.push(row);
+      }
+      for (const key of ["openingCash", "closingCash", "cardGross", "otherGross", "discounts", "paymentFees", "booth", "travel", "otherCosts", "hours"]) state[key] = field(key).value;
+      return state;
+    }
+
+    function render() {
+      const result = MarketClose.calculate(readState());
+      const errorBox = document.getElementById("validation-errors");
+      const errorList = document.getElementById("error-list");
+      const status = document.getElementById("balance-status");
+      errorList.replaceChildren();
+      for (const input of form.querySelectorAll("input")) input.removeAttribute("aria-invalid");
+      errorBox.hidden = result.ok;
+      if (!result.ok) {
+        for (const error of result.errors) {
+          const item = document.createElement("li");
+          item.textContent = error.message;
+          errorList.append(item);
+          if (error.field) field(error.field)?.setAttribute("aria-invalid", "true");
+        }
+        for (const id of resultIds) document.getElementById(id).textContent = "--";
+        for (let i = 0; i < 3; i++) document.getElementById(`sold-${i}`).textContent = "--";
+        status.className = "callout error";
+        status.textContent = "The example is incomplete or invalid. No result is shown until the entries are corrected.";
+        return;
+      }
+      for (const id of resultIds) document.getElementById(id).textContent = id === "units" ? String(result.sold) : format(result[id]);
+      result.rows.forEach((row, i) => { document.getElementById(`sold-${i}`).textContent = String(row.sold); });
+      status.className = result.variance === 0 ? "callout" : "callout warning";
+      status.textContent = result.variance === 0
+        ? "The two records match. This does not independently verify the counts, prices or costs."
+        : `Needs review: recorded takings are ${format(Math.abs(result.variance))} ${result.variance < 0 ? "below" : "above"} the stock-implied figure. Surplus is provisional until the difference is explained. Check counts, discounts, the cash float and payment records.`;
+    }
+
+    function loadSample(which) {
+      const state = MarketClose.sample(which);
+      state.rows.forEach((row, i) => {
+        for (const [key, value] of Object.entries(row)) field(`rows.${i}.${key}`).value = value;
+      });
+      for (const [key, value] of Object.entries(state)) if (key !== "rows") field(key).value = value;
+      document.getElementById("sample-status").textContent = `Sample ${which} is loaded. These are fictional figures.`;
+      render();
+    }
+
+    form.addEventListener("input", () => {
+      document.getElementById("sample-status").textContent = "You are editing fictional example data. Changes are not saved.";
+      render();
+    });
+    form.addEventListener("submit", event => event.preventDefault());
+    document.getElementById("sample-a").addEventListener("click", () => loadSample("A"));
+    document.getElementById("sample-b").addEventListener("click", () => loadSample("B"));
+    document.getElementById("print").addEventListener("click", () => window.print());
+    document.querySelector('a[href="#research-guide"]').addEventListener("click", () => {
+      document.getElementById("research-guide").open = true;
+    });
+    document.getElementById("feedback-form").addEventListener("input", () => {
+      document.getElementById("feedback-result").hidden = true;
+    });
+    document.getElementById("feedback-form").addEventListener("submit", event => {
+      event.preventDefault();
+      const feedbackForm = event.currentTarget;
+      if (!feedbackForm.reportValidity()) return;
+      const values = new FormData(feedbackForm);
+      document.getElementById("feedback-text").value = [
+        "MARKET CLOSE - CONCEPT FEEDBACK",
+        "Self-reported feedback only. Not a purchase, payment or observed usability session.",
+        "",
+        `1. Current method and problems: ${values.get("currentMethod").trim()}`,
+        `2. Task result and next checks: ${values.get("taskResult").trim()}`,
+        `3. Preferred option at the displayed prices: ${values.get("choice")}`,
+        `4. Reason and missing details: ${values.get("reason").trim()}`,
+        `5. Assistance: ${values.get("help")}`,
+        `Where I got stuck: ${values.get("helpDetail").trim() || "Not specified"}`,
+        "",
+        "No information has been sent or saved by this page."
+      ].join("\n");
+      document.getElementById("feedback-result").hidden = false;
+      document.getElementById("feedback-text").focus();
+    });
+    render();
+  </script>
+</body>
+</html>
